@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scp-mcp"
+version = "0.1.0"
+description = "SCP Foundation data access via Model Context Protocol"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "mcp>=0.1.0",
+    "lancedb>=0.1.0",
+    "sentence-transformers>=2.2.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "polars>=0.20.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.10.0",
+    "ruff>=0.5.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pre-commit>=3.0.0",
+]
+
+[project.scripts]
+scp-mcp = "scp_mcp:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["scp_mcp"]
+omit = ["tests/*"]

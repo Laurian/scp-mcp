@@ -51,6 +51,26 @@ You can also download data manually using the script directly:
 
 This will create a new timestamped directory under `./data/` with the latest SCP Foundation content.
 
+## Running the Server
+
+Start the MCP server (loads items into LanceDB on first run):
+
+```bash
+make run
+```
+
+To force a reingestion of items without deleting the whole DB:
+
+```bash
+make reingest-items
+# or directly:
+uv run python -m scp_mcp --reingest-items
+```
+
+Optional flags:
+
+- `--data-dir <path>` to override the SCP data directory used for ingest.
+
 ## Project Structure
 
 ```txt

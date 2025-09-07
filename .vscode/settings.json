@@ -1,5 +1,35 @@
 {
     "cSpell.words": [
-        "VENV"
-    ]
+      "autopep",
+      "clinerules",
+      "direnv",
+      "Docstrings",
+      "dotenv",
+      "envrc",
+      "isort",
+      "kilocode",
+      "lancedb",
+      "levelname",
+      "mypy",
+      "pycache",
+      "pycodestyle",
+      "pydantic",
+      "pyflakes",
+      "pylsp",
+      "pyproject",
+      "pytest",
+      "setuptools",
+      "testpaths",
+      "VENV",
+      "yapf"
+    ],
+    "cSpell.language": "en,en-US,en-GB",
+    "markdownlint.config": {
+      "fenced-code-language": false,
+      "blanks-around-headings": false,
+      "blanks-around-lists": false,
+      "no-trailing-spaces": false,
+      "no-multiple-blanks": false,
+      "single-title": false
+    }
 }
