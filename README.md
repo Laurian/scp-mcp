@@ -17,7 +17,6 @@ The project uses timestamped SCP data directories in the format `data/scp-<times
 
 - **`make data`** - Ensures SCP data exists (downloads only if no `data/scp-*` directories are found)
 - **`make download`** - Always downloads fresh SCP data, creating a new timestamped directory
-- **`make data/scp-<specific-id>`** - Downloads data only if that specific directory doesn't exist
 
 #### Examples
 
@@ -28,8 +27,6 @@ make data
 # Download fresh data (always runs, creates new timestamped directory)
 make download
 
-# Target a specific data directory (downloads if it doesn't exist)
-make data/scp-1757125983-4258b02a7d4b
 ```
 
 ### Data Structure
