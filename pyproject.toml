@@ -9,12 +9,13 @@ description = "SCP Foundation data access via Model Context Protocol"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 dependencies = [
-    "mcp>=0.1.0",
+    "fastmcp>=0.1.0",
     "lancedb>=0.1.0",
     "sentence-transformers>=2.2.0",
     "python-dotenv>=1.0.0",
     "pydantic>=2.0.0",
     "polars>=0.20.0",
+    "langchain>=0.3.0"
 ]
 
 [project.optional-dependencies]
@@ -24,6 +25,7 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pre-commit>=3.0.0",
+    "fastmcp[cli]>=0.1.0",
 ]
 
 [project.scripts]

@@ -11,14 +11,14 @@ venv:
 	$(UV) venv $(VENV)
 
 .PHONY: install
-install: venv
-	@echo "Installing dependencies..."
-	$(UV) pip install -e .
+install:
+	@echo "Syncing dependencies..."
+	$(UV) sync
 
 .PHONY: dev-install
-dev-install: venv
-	@echo "Installing development dependencies..."
-	$(UV) pip install -e ".[dev]"
+dev-install:
+	@echo "Syncing development dependencies..."
+	$(UV) sync --extra dev
 
 # Run targets
 .PHONY: run
