@@ -1,0 +1,25 @@
+{
+    "cSpell.words": [
+      "clinerules",
+      "fastmcp",
+      "HUGGINGFACE",
+      "kilocode",
+      "lancedb",
+      "toggleable",
+      "upserts",
+      "Wikidot"
+    ],
+    "cSpell.language": "en,en-US,en-GB",
+    "markdownlint.config": {
+      "fenced-code-language": false,
+      "blanks-around-headings": false,
+      "blanks-around-lists": false,
+      "no-trailing-spaces": false,
+      "no-multiple-blanks": false,
+      "single-title": false,
+      "no-inline-html": false,
+      "no-emphasis-as-heading": false,
+      "blanks-around-fences": false,
+      "no-hard-tabs": false
+    }
+}
