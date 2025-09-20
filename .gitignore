@@ -161,6 +161,11 @@ ipython_config.py
 #   https://pdm.fming.dev/#use-with-ide
 .pdm.toml
 
+# uv
+#   uv.lock should be committed to version control for reproducible builds
+#uv.lock
+.venv/
+
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
@@ -241,6 +246,33 @@ cache/*/**
 # models - ignore downloaded models but keep directory structure
 models/*
 !models/.gitkeep
+
+# SCP MCP Server specific
+# LanceDB database files
+data/lancedb/*.lance
+
+# Processed and staging data (can be regenerated)
+data/processed/*
+data/staging/*
+!data/processed/.gitkeep
+!data/staging/.gitkeep
+
+# Server logs and temporary files
+*.pid
+server.log
+access.log
+error.log
+
+# IDE and editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific
+Thumbs.db
+ehthumbs.db
 
 
 # START Ruler Generated Files

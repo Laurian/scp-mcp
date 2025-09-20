@@ -1,0 +1,193 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scp-mcp"
+version = "0.1.0"
+description = "A Model Context Protocol Server for SCP Foundation Data"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "SCP MCP Contributors" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+requires-python = ">=3.12"
+dependencies = [
+    # MCP Framework
+    "fastmcp>=0.5.0",
+
+    # Database & Storage
+    "lancedb>=0.13.0",
+    "pyarrow>=15.0.0",
+
+    # Data Processing
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+
+    # Text Processing & Markdown
+    "markdownify>=0.11.0",
+    "markitdown>=0.0.1a2",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "html2text>=2020.1.16",
+
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "typer>=0.9.0",
+    "rich>=13.7.0",
+    "httpx>=0.26.0",
+    "python-dateutil>=2.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+
+    # Type Checking
+    "mypy>=1.8.0",
+    "types-beautifulsoup4",
+    "types-requests",
+
+    # Code Quality
+    "ruff>=0.1.9",
+    "black>=23.12.0",
+    "isort>=5.13.0",
+
+    # Development Tools
+    "pre-commit>=3.6.0",
+    "ipython>=8.18.0",
+    "jupyter>=1.0.0",
+]
+server = [
+    # HTTP Server Support
+    "uvicorn>=0.25.0",
+    "fastapi>=0.108.0",
+]
+ai = [
+    # AI/ML Libraries (optional)
+    "transformers>=4.36.0",
+    "torch>=2.1.0",
+    "sentence-transformers>=2.2.0",
+    "huggingface-hub>=0.19.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/scp-data/scp-mcp"
+Repository = "https://github.com/scp-data/scp-mcp"
+Issues = "https://github.com/scp-data/scp-mcp/issues"
+
+[project.scripts]
+scp-mcp = "scp_mcp.cli:main"
+scp-mcp-server = "scp_mcp.server:main"
+
+# Tool configurations
+[tool.hatch.build.targets.wheel]
+packages = ["src/scp_mcp"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/scripts",
+    "/README.md",
+    "/LICENSE",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.black]
+target-version = ['py312']
+line-length = 88
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "lancedb.*",
+    "fastmcp.*",
+    "markdownify.*",
+    "markitdown.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

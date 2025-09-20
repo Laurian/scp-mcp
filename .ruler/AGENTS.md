@@ -489,6 +489,139 @@ cp .env.template .env.local  # Manual setup
 - **Commit Tracking**: Directory names include timestamp and commit ID for traceability
 - **Cross-Platform**: Works with both modern and legacy Git versions
 
+### Data Export Scripts
+**Utility Scripts for Data Export and Analysis**
+
+The project includes production-ready export scripts for extracting SCP data in various formats:
+
+#### JSON Export (`scripts/export_json.py`)
+```bash
+# Export all items to hierarchical JSON structure
+./scripts/export_json.py
+
+# Export specific items or ranges
+./scripts/export_json.py SCP-173          # Single item
+./scripts/export_json.py 100-200          # Range export
+./scripts/export_json.py --random 50      # Random sampling
+
+# Custom output location
+./scripts/export_json.py --output ./backup/ --random 100
+```
+
+#### Markdown Export (`scripts/export_markdown.py`)
+```bash
+# Export with YAML frontmatter metadata
+./scripts/export_markdown.py --random 25
+
+# All formats support flexible identifiers
+./scripts/export_markdown.py 682          # SCP-682
+./scripts/export_markdown.py scp-173      # Case insensitive
+```
+
+**Export Features:**
+- **Hierarchical Organization**: Files organized by SCP identifier (e.g., `1/2/3/4/scp-1234.ext`)
+- **Flexible Input**: Accepts `SCP-XXXX`, numeric, or `scp-xxxx` formats
+- **Range Processing**: Intelligent range parsing (e.g., `1-999` for Series I)
+- **Random Sampling**: Unbiased selection for testing and analysis
+- **Progress Reporting**: Batch processing with status updates
+- **Content Conversion**: HTML-to-Markdown transformation for readability
+- **YAML Frontmatter**: Structured metadata in Markdown exports with full versioning information
+- **Versioning Metadata**: Includes `dataset_commit` and `content_sha1` for reproducible reads and integrity verification
+- **CC BY-SA 3.0 Compliance**: Automatic attribution inclusion
+
+**Output Structure:**
+```
+data/staging/
+├── json/                           # Raw JSON exports
+│   ├── 1/7/3/scp-173.json         # Hierarchical organization
+│   └── 6/8/2/scp-682.json         # Complete metadata + content
+└── markdown/                       # Markdown with YAML frontmatter
+    ├── 1/7/3/scp-173.md           # AI-friendly format
+    └── 6/8/2/scp-682.md           # Structured metadata header
+```
+
+**Use Cases:**
+- **Data Analysis**: Export subsets for statistical analysis
+- **Content Migration**: Transfer data to other systems
+- **Backup & Archival**: Create portable data snapshots
+- **AI Training**: Generate structured datasets for ML workflows
+- **Documentation**: Create human-readable SCP archives
+
+### Content Processing Utilities
+**Core Modules for Data Loading and Content Conversion**
+
+The project includes specialized utility modules for handling SCP data processing and content transformation:
+
+#### Data Loader (`src/scp_mcp/utils/data_loader.py`)
+**Handles loading SCP data from the dataset files with flexible identifier support**
+
+**Key Functions:**
+```python
+# Load complete SCP data with metadata and content
+load_scp_data(scp_identifier: str) -> Optional[dict]
+    # Accepts: "SCP-173", "173", "scp-173"
+    # Returns: Full item dictionary with all available fields including dataset_commit and content_sha1
+
+# Get all available SCP item IDs from index
+get_all_item_ids() -> Optional[list[str]]
+    # Returns: List of all SCP identifiers in dataset
+
+# Generate hierarchical debug folder path
+get_debug_folder_path(scp_item: dict) -> str
+    # Input: SCP item dictionary
+    # Returns: "1/7/3" for SCP-173, "6/8/2" for SCP-682
+
+# Extract HTML content for conversion
+get_scp_html_content(scp_identifier: str) -> Optional[str]
+    # Returns: raw_content or raw_source HTML for processing
+```
+
+**Features:**
+- **Flexible Identifier Resolution**: Normalizes various SCP ID formats
+- **Automatic Content Merging**: Combines index metadata with content files
+- **Versioning Field Generation**: Automatically adds `dataset_commit` and `content_sha1` fields
+- **Hierarchical Path Generation**: Creates organized directory structures
+- **Fallback Content Handling**: Uses raw_source when raw_content unavailable
+- **Error Resilience**: Graceful handling of missing or malformed data
+
+#### Content Converter (`src/scp_mcp/utils/content_converter.py`)
+**Transforms SCP Foundation content from raw HTML to AI-friendly markdown format**
+
+**Primary Function:**
+```python
+html_to_markdown(html_content: str) -> Optional[str]
+    # Main entry point for HTML-to-Markdown conversion
+    # Returns: AI-optimized markdown or None if conversion fails
+```
+
+**Conversion Pipeline:**
+1. **HTML Cleanup**: Remove boilerplate elements (licensing, rating widgets, navigation)
+2. **Interactive Element Removal**: Strip JavaScript, forms, and dynamic content
+3. **Structure Preservation**: Maintain content hierarchy and formatting
+4. **SCP-Specific Handling**: Process redacted text, classification bars, special formatting
+5. **Markdown Optimization**: Convert to clean, readable markdown for AI consumption
+6. **Error Recovery**: Robust fallback mechanisms for malformed HTML
+
+**Advanced Features:**
+- **Boilerplate Removal**: Strips 50+ types of non-content elements
+- **Section Header Conversion**: Transforms HTML headers to proper markdown
+- **Special Formatting**: Handles SCP-specific elements (DATA EXPUNGED, [REDACTED])
+- **Table Conversion**: Converts HTML tables to markdown format
+- **Image Processing**: Preserves images with proper markdown syntax
+- **Whitespace Normalization**: Cleans excessive spacing while maintaining structure
+
+**Content Processing Rules:**
+- **Discard**: License boxes, rating widgets, navigation, ads, comments
+- **Preserve**: Main content, images, tables, lists, blockquotes, headers
+- **Transform**: HTML structure to markdown equivalents
+- **Optimize**: For AI/LLM comprehension and processing
+
+**Integration with Data Pipeline:**
+- **Ingest Phase**: Converts `raw_content` to `markdown` field during processing
+- **Export Scripts**: Used by markdown export for content transformation
+- **MCP Resources**: Powers AI-optimized content delivery via `urn:scp:item:{id}/content`
+- **Fallback Handling**: Graceful degradation when conversion fails
+
 ### Performance Optimizations
 - **Change-Only Upserts**: Only write rows when `content_sha1` differs
 - **Batch Processing**: Bulk ingest operations for efficiency
