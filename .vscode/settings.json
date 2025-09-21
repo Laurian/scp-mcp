@@ -51,6 +51,7 @@
       "blanks-around-fences": false,
       "no-hard-tabs": false,
       "no-bare-urls": false,
-      "first-line-heading": false
+      "first-line-heading": false,
+      "single-trailing-newline": false
     }
 }

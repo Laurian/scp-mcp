@@ -71,6 +71,8 @@ class Settings(BaseSettings):
 
     # API Keys (optional, loaded from .env.local)
     openai_api_key: str | None = Field(default=None, description="OpenAI API key")
+    openai_api_base: str | None = Field(default=None, description="OpenAI API base URL (for alternative endpoints)")
+    openai_model: str | None = Field(default=None, description="OpenAI model name (default: gpt-3.5-turbo)")
     anthropic_api_key: str | None = Field(default=None, description="Anthropic API key")
     huggingface_token: str | None = Field(default=None, description="HuggingFace API token")
 

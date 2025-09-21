@@ -463,6 +463,8 @@ The project uses a structured environment configuration system with multiple fil
 - **HuggingFace Models**: Default cache location `./models` with configurable paths
 - **Database**: LanceDB storage location and performance settings
 - **API Keys**: OpenAI, Anthropic, HuggingFace tokens (set in `.env.local`)
+  - **OpenAI Configuration**: `OPENAI_API_KEY`, `OPENAI_API_BASE`, `OPENAI_MODEL`
+  - **Alternative Endpoints**: Support for OpenRouter, LocalAI, Ollama via `OPENAI_API_BASE`
 - **Performance**: Rate limiting, batch sizes, caching configuration
 - **Security**: CORS settings, authentication, license compliance
 - **Development**: Debug flags, hot reload, profiling options
@@ -518,6 +520,20 @@ The project includes production-ready export scripts for extracting SCP data in 
 ./scripts/export_markdown.py scp-173      # Case insensitive
 ```
 
+#### AI Summary Export (`scripts/export_summary.py`)
+```bash
+# Export AI-generated summaries with YAML frontmatter
+./scripts/export_summary.py --random 10
+
+# Skip existing files (default) or force regeneration
+./scripts/export_summary.py --force SCP-173
+
+# Custom endpoints and concurrency control
+./scripts/export_summary.py --max-concurrent 3 --random 5
+
+# Requires OpenAI API key and compatible endpoint
+```
+
 **Export Features:**
 - **Hierarchical Organization**: Files organized by SCP identifier (e.g., `1/2/3/4/scp-1234.ext`)
 - **Flexible Input**: Accepts `SCP-XXXX`, numeric, or `scp-xxxx` formats
@@ -525,9 +541,17 @@ The project includes production-ready export scripts for extracting SCP data in 
 - **Random Sampling**: Unbiased selection for testing and analysis
 - **Progress Reporting**: Batch processing with status updates
 - **Content Conversion**: HTML-to-Markdown transformation for readability
-- **YAML Frontmatter**: Structured metadata in Markdown exports with full versioning information
+- **YAML Frontmatter**: Structured metadata in exports with full versioning information
 - **Versioning Metadata**: Includes `dataset_commit` and `content_sha1` for reproducible reads and integrity verification
 - **CC BY-SA 3.0 Compliance**: Automatic attribution inclusion
+
+**AI Summary Export Additional Features:**
+- **Skip Existing Files**: Automatically resumes interrupted runs by skipping completed summaries
+- **Force Regeneration**: `--force` flag to overwrite existing summaries
+- **Custom AI Endpoints**: Support for OpenAI-compatible APIs (OpenRouter, LocalAI, Ollama)
+- **Rate Limiting**: Configurable concurrent API calls to respect service limits
+- **Error Resilience**: Graceful handling of API failures without creating broken files
+- **AI-Specific Metadata**: Includes `ai_generated: true` and `content_type: "ai_summary"` fields
 
 **Output Structure:**
 ```
@@ -535,9 +559,12 @@ data/staging/
 ├── json/                           # Raw JSON exports
 │   ├── 1/7/3/scp-173.json         # Hierarchical organization
 │   └── 6/8/2/scp-682.json         # Complete metadata + content
-└── markdown/                       # Markdown with YAML frontmatter
-    ├── 1/7/3/scp-173.md           # AI-friendly format
-    └── 6/8/2/scp-682.md           # Structured metadata header
+├── markdown/                       # Markdown with YAML frontmatter
+│   ├── 1/7/3/scp-173.md           # AI-friendly format
+│   └── 6/8/2/scp-682.md           # Structured metadata header
+└── summary/                        # AI-generated summaries
+    ├── 1/7/3/scp-173.md           # AI summary with metadata
+    └── 6/8/2/scp-682.md           # Concise AI-generated content
 ```
 
 **Use Cases:**
@@ -546,6 +573,7 @@ data/staging/
 - **Backup & Archival**: Create portable data snapshots
 - **AI Training**: Generate structured datasets for ML workflows
 - **Documentation**: Create human-readable SCP archives
+- **AI Summaries**: Generate concise, AI-powered summaries for quick reference and analysis
 
 ### Content Processing Utilities
 **Core Modules for Data Loading and Content Conversion**

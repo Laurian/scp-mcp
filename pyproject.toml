@@ -82,6 +82,7 @@ ai = [
     "torch>=2.1.0",
     "sentence-transformers>=2.2.0",
     "huggingface-hub>=0.19.0",
+    "openai>=1.0.0",
 ]
 
 [project.urls]

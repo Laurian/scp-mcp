@@ -180,9 +180,49 @@ Export SCP items as Markdown files with YAML frontmatter metadata:
 ./scripts/export_markdown.py --help
 ```
 
+### AI Summary Export
+
+Generate AI-powered summaries of SCP items using OpenAI or compatible endpoints:
+
+```bash
+# Export all items with AI summaries to ./data/staging/summary/
+./scripts/export_summary.py
+
+# Export single item summary
+./scripts/export_summary.py SCP-173
+./scripts/export_summary.py 682                # Short form
+
+# Export range of item summaries
+./scripts/export_summary.py 100-200            # Exports SCP-100 through SCP-200
+
+# Export random item summaries
+./scripts/export_summary.py --random 10        # Export 10 random summaries
+./scripts/export_summary.py -r 5               # Short form
+
+# Force regenerate existing summaries
+./scripts/export_summary.py --force --random 5 # Overwrite existing files
+
+# Custom settings
+./scripts/export_summary.py --output ./summaries/ --max-concurrent 3 --random 10
+
+# Get help
+./scripts/export_summary.py --help
+```
+
+**Requirements for AI Summary Export:**
+- OpenAI API key configured in `.env.local`
+- OpenAI dependency: `uv sync --extra ai` or `pip install openai>=1.0.0`
+- Optional: Custom endpoints via `OPENAI_API_BASE` (supports OpenRouter, etc.)
+
+**Features:**
+- **Skip Existing Files**: Automatically skips items that already have summaries (use `--force` to override)
+- **Custom Endpoints**: Supports OpenAI-compatible APIs like OpenRouter, LocalAI, Ollama
+- **Rate Limiting**: Configurable concurrent requests (`--max-concurrent`)
+- **Resume Support**: Can resume interrupted runs without losing progress
+
 ### Export Features
 
-Both export scripts provide:
+All export scripts provide:
 
 - **Hierarchical Organization**: Files are organized in folders based on SCP identifier (e.g., SCP-1234 → `1/2/3/4/scp-1234.ext`)
 - **Flexible Input Formats**: Accept `SCP-173`, `173`, `scp-173`, or ranges like `100-200`
@@ -209,9 +249,17 @@ data/staging/markdown/
 └── 1/4/4/6/scp-1446.md         # SCP-1446 with YAML frontmatter
 ```
 
+**AI Summary Export:**
+```
+data/staging/summary/
+├── 1/7/3/scp-173.md            # SCP-173 AI summary with metadata
+├── 6/8/2/scp-682.md            # SCP-682 AI summary with metadata  
+└── 1/4/4/6/scp-1446.md         # SCP-1446 AI summary with metadata
+```
+
 ### YAML Frontmatter Structure
 
-Markdown exports include structured metadata in YAML frontmatter:
+**Markdown Exports** include structured metadata in YAML frontmatter:
 
 ```yaml
 ---
@@ -239,6 +287,35 @@ license_url: "https://creativecommons.org/licenses/by-sa/3.0/"
 
 ## Content
 [Converted markdown content here...]
+```
+
+**AI Summary Exports** use similar metadata with additional AI-specific fields:
+
+```yaml
+---
+scp_id: "SCP-173"
+title: "SCP-173"
+link: "scp-173"
+scp_number: 173
+series: "series-1"
+rating: 10129
+author: "Lt Masipag"
+created_at: "2008-07-25T20:49:00"
+source_url: "https://scp-wiki.wikidot.com/scp-173"
+tags:
+  - "euclid"
+  - "sculpture" 
+  - "hostile"
+license: "CC BY-SA 3.0"
+license_url: "https://creativecommons.org/licenses/by-sa/3.0/"
+license_note: "This summary was generated using AI and is based on content from the SCP Wiki, which is licensed under CC BY-SA 3.0. Derivatives must be shared under the same license."
+ai_generated: true
+content_type: "ai_summary"
+dataset_commit: "cd44aa56d1eb"
+content_sha1: "dd28a56e4103dd5e4f7dd6915a242f004af19943"
+---
+
+[AI-generated summary content here...]
 ```
 
 ## Development
@@ -315,6 +392,8 @@ Key settings:
 ```env
 # API Keys (set in .env.local)
 OPENAI_API_KEY=sk-your-key-here
+OPENAI_API_BASE=https://api.openai.com/v1      # Optional: Custom endpoint
+OPENAI_MODEL=gpt-3.5-turbo                     # Optional: Custom model
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 HUGGINGFACE_TOKEN=hf_your-token-here
 
