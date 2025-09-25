@@ -65,6 +65,18 @@ class TestSCPItem:
         )
         assert not item_no_content.has_content()
 
+        # Test item with only summary
+        item_summary_only = SCPItem(
+            link="scp-888",
+            scp="SCP-888",
+            scp_number=888,
+            title="Test",
+            series="series-1",
+            url="https://example.com",
+            summary="This is a test summary of an SCP item."
+        )
+        assert item_summary_only.has_content()
+
     def test_get_primary_content(self, sample_scp_item):
         """Test primary content selection."""
         item = SCPItem(**sample_scp_item)
@@ -77,6 +89,34 @@ class TestSCPItem:
         )
         content = item_no_markdown.get_primary_content()
         assert content.startswith("Item #: SCP-173")  # Should use raw_content
+
+    def test_get_summary_content(self, sample_scp_item):
+        """Test summary content selection with fallbacks."""
+        # Test with summary present
+        item_with_summary = SCPItem(
+            **sample_scp_item,
+            summary="This is a concise AI-generated summary."
+        )
+        content = item_with_summary.get_summary_content()
+        assert content == "This is a concise AI-generated summary."
+
+        # Test without summary (should fall back to markdown)
+        item = SCPItem(**sample_scp_item)
+        content = item.get_summary_content()
+        assert content == item.markdown
+
+        # Test without summary or markdown (should fall back to raw_content)
+        item_no_summary_no_md = SCPItem(
+            link="scp-test2",
+            scp="SCP-TEST2",
+            scp_number=998,
+            title="Test",
+            series="test",
+            url="https://example.com",
+            raw_content="Raw content here"
+        )
+        content = item_no_summary_no_md.get_summary_content()
+        assert content == "Raw content here"
 
     def test_identifier_variants(self, sample_scp_item):
         """Test identifier variant generation."""
@@ -105,6 +145,12 @@ class TestItemHit:
         assert hit.rating == item.rating
         assert hit.series == item.series
         assert hit.tags == item.tags
+        assert hit.summary is None  # No summary in sample data
+
+        # Test with summary
+        item_with_summary = SCPItem(**sample_scp_item, summary="Test summary")
+        hit_with_summary = ItemHit.from_scp_item(item_with_summary)
+        assert hit_with_summary.summary == "Test summary"
 
 
 class TestSearchResult:
@@ -151,6 +197,33 @@ class TestContentResponse:
         assert response.markdown == "# Test Content"
         assert response.raw_content == "Test Content Raw"
         assert not response.fallback
+
+    def test_content_response_with_summary(self):
+        """Test creating content response with summary."""
+        response = ContentResponse(
+            markdown="# Test Content",
+            raw_content="Test Content Raw",
+            summary="This is a test summary",
+            url="https://example.com",
+            content_sha1="abc123",
+            dataset_commit="commit123"
+        )
+
+        assert response.summary == "This is a test summary"
+        assert response.get_summary_content() == "This is a test summary"
+
+    def test_content_response_summary_fallback(self):
+        """Test summary content fallback in ContentResponse."""
+        response = ContentResponse(
+            markdown="# Test Content",
+            raw_content="Test Content Raw",
+            url="https://example.com",
+            content_sha1="abc123",
+            dataset_commit="commit123"
+        )
+
+        # Should fall back to markdown when summary is None
+        assert response.get_summary_content() == "# Test Content"
 
     def test_get_best_content(self):
         """Test best content selection."""

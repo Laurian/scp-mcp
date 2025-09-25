@@ -57,6 +57,7 @@ MCP requires all resources to be uniquely identified by URIs. We use URNs to avo
 | `raw_source` | STRING | original wikitext/markup (content files only) |
 | `raw_content` | STRING | cleaned text body (content files only) |
 | `markdown` | STRING | **AI-friendly markdown** generated from `raw_content` |
+| `summary` | STRING? | **AI-generated concise summary** (optional) |
 | `images` | LIST<STRING> | image URLs |
 | `hubs` | LIST<STRING> | hub page references |
 | `references` | LIST<STRING> | cross-referenced items |
@@ -72,6 +73,7 @@ MCP requires all resources to be uniquely identified by URIs. We use URNs to avo
 - **Field Mapping**: Core fields (`link`, `scp`, `scp_number`, `title`, `series`, `tags`, `rating`, `created_at`, `creator`, `url`) are identical between index and content files
 - **Content Fields**: `raw_content` and `raw_source` only exist in content files, not in index
 - **Markdown Generation**: We transform `raw_content` into AI-friendly markdown during ingest for better LLM comprehension
+- **Summary Generation**: Optional AI-generated summaries provide concise overviews of SCP items for quick understanding
 - **Generated Fields**: `content_sha1` and `dataset_commit` are added during our processing pipeline
 - **LanceDB Versioning**: Automatic table versioning enables time-travel queries and reproducible reads. Every operation creates a new version, preserving complete history
 
@@ -153,8 +155,9 @@ MCP requires all resources to be uniquely identified by URIs. We use URNs to avo
 
 ### `urn:scp:item:{SCP-XXXX}/content`
 **AI-optimized content view for LLM processing**
-- **Returns:** `{markdown, raw_content, raw_source?, url, content_sha1}`
+- **Returns:** `{markdown, raw_content, raw_source?, summary?, url, content_sha1}`
 - **Primary:** **`markdown`** field optimized for AI comprehension
+- **Summary:** **`summary`** field provides concise AI-generated overview
 - **Fallback:** `raw_content` if markdown unavailable
 - **Versioning:** Includes `dataset_commit`
 
@@ -228,8 +231,9 @@ Results are deterministic across identical `dataset_commit` values for reproduci
 ### `get_item_content`
 **AI-optimized content retrieval for LLM processing**
 - **Input:** identifier (flexible format)
-- **Returns:** `{markdown, raw_content, raw_source?, url, content_sha1, dataset_commit}`
+- **Returns:** `{markdown, raw_content, raw_source?, summary?, url, content_sha1, dataset_commit}`
 - **Primary Field:** `markdown` - AI-friendly formatted content
+- **Summary Field:** `summary` - Concise AI-generated overview (if available)
 - **Versioning:** Full reproducibility metadata included
 
 ### `get_related`

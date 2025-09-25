@@ -44,6 +44,7 @@ class SCPItem(BaseModel):
     raw_source: str | None = Field(None, description="Original wikitext/markup")
     raw_content: str | None = Field(None, description="Cleaned text body")
     markdown: str | None = Field(None, description="AI-friendly markdown")
+    summary: str | None = Field(None, description="AI-generated concise summary")
 
     # Cross-references
     images: list[str] = Field(default_factory=list, description="Image URLs")
@@ -81,11 +82,15 @@ class SCPItem(BaseModel):
 
     def has_content(self) -> bool:
         """Check if item has any content fields."""
-        return bool(self.raw_content or self.raw_source or self.markdown)
+        return bool(self.raw_content or self.raw_source or self.markdown or self.summary)
 
     def get_primary_content(self) -> str | None:
         """Get the primary content field for display."""
         return self.markdown or self.raw_content or self.raw_source
+
+    def get_summary_content(self) -> str | None:
+        """Get the summary content with fallback to other content fields."""
+        return self.summary or self.markdown or self.raw_content or self.raw_source
 
     def get_identifier_variants(self) -> list[str]:
         """Get all possible identifier variants for this item."""
@@ -117,6 +122,7 @@ class ItemHit(BaseModel):
     tags: list[str] | None = Field(None, description="Item tags")
     created_at: datetime | None = Field(None, description="Publication date")
     creator: str | None = Field(None, description="Author")
+    summary: str | None = Field(None, description="AI-generated summary (if available)")
 
     @classmethod
     def from_scp_item(cls, item: SCPItem) -> "ItemHit":
@@ -131,6 +137,7 @@ class ItemHit(BaseModel):
             tags=item.tags if item.tags else None,
             created_at=item.created_at,
             creator=item.creator,
+            summary=item.summary,
         )
 
 
@@ -155,6 +162,7 @@ class ContentResponse(BaseModel):
     markdown: str | None = Field(None, description="AI-optimized markdown content")
     raw_content: str | None = Field(None, description="Cleaned text content")
     raw_source: str | None = Field(None, description="Original wikitext/markup")
+    summary: str | None = Field(None, description="AI-generated concise summary")
     url: str = Field(..., description="Canonical wiki URL")
     content_sha1: str | None = Field(None, description="Content hash")
     dataset_commit: str | None = Field(None, description="Dataset version")
@@ -163,6 +171,10 @@ class ContentResponse(BaseModel):
     def get_best_content(self) -> str | None:
         """Get the best available content for AI processing."""
         return self.markdown or self.raw_content or self.raw_source
+
+    def get_summary_content(self) -> str | None:
+        """Get summary content with fallback to other content types."""
+        return self.summary or self.markdown or self.raw_content or self.raw_source
 
 
 class Attribution(BaseModel):

@@ -3101,6 +3101,11 @@ server = [
     { name = "uvicorn" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.12.0" },
@@ -3140,6 +3145,9 @@ requires-dist = [
     { name = "uvicorn", marker = "extra == 'server'", specifier = ">=0.25.0" },
 ]
 provides-extras = ["dev", "server", "ai"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.4.2" }]
 
 [[package]]
 name = "send2trash"

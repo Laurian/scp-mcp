@@ -238,6 +238,10 @@ def generate_markdown_content(scp_data: dict) -> str:
     if scp_data.get('content_sha1'):
         lines.append(f"content_sha1: \"{scp_data['content_sha1']}\"")
 
+    # # AI-generated summary if available
+    # if scp_data.get('summary'):
+    #    lines.append(f"ai_summary: \"{scp_data['summary']}\"")
+
     # License information
     lines.append("license: \"CC BY-SA 3.0\"")
     lines.append("license_url: \"https://creativecommons.org/licenses/by-sa/3.0/\"")
