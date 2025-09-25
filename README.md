@@ -124,9 +124,9 @@ uv run scp-mcp validate                 # Validate setup
 uv run scp-mcp config                   # Show configuration
 ```
 
-## Data Export Scripts
+## Data Scripts
 
-The project includes utility scripts for exporting SCP data to different formats for analysis, backup, or integration with other tools.
+The project includes utility scripts for importing, exporting, and inspecting SCP data in different formats for analysis, backup, or integration with other tools.
 
 ### JSON Export
 
@@ -147,7 +147,11 @@ Export SCP items as individual JSON files organized in a hierarchical folder str
 ./scripts/export_json.py --random 10           # Export 10 random items
 ./scripts/export_json.py -r 25                 # Short form
 
-# Custom output directory
+# Deterministic random sampling
+./scripts/export_json.py --random 5 --seed 42  # Reproducible random selection
+
+# Dry run and custom output
+./scripts/export_json.py --dry-run --random 5  # Preview without writing files
 ./scripts/export_json.py --output ./my_exports/ --random 5
 
 # Get help
@@ -173,7 +177,11 @@ Export SCP items as Markdown files with YAML frontmatter metadata:
 ./scripts/export_markdown.py --random 10       # Export 10 random items
 ./scripts/export_markdown.py -r 5              # Short form
 
-# Custom output directory
+# Deterministic random sampling
+./scripts/export_markdown.py --random 5 --seed 42  # Reproducible random selection
+
+# Dry run and custom output
+./scripts/export_markdown.py --dry-run --random 5  # Preview without writing files
 ./scripts/export_markdown.py --output ./docs/ --random 3
 
 # Get help
@@ -199,8 +207,12 @@ Generate AI-powered summaries of SCP items using OpenAI or compatible endpoints:
 ./scripts/export_summary.py --random 10        # Export 10 random summaries
 ./scripts/export_summary.py -r 5               # Short form
 
-# Force regenerate existing summaries
-./scripts/export_summary.py --force --random 5 # Overwrite existing files
+# Deterministic random sampling
+./scripts/export_summary.py --random 5 --seed 42  # Reproducible random selection
+
+# Force regenerate and dry run
+./scripts/export_summary.py --force --random 5 --seed 42  # Overwrite existing files
+./scripts/export_summary.py --dry-run --random 3         # Preview without API calls
 
 # Custom settings
 ./scripts/export_summary.py --output ./summaries/ --max-concurrent 3 --random 10
@@ -226,6 +238,8 @@ All export scripts provide:
 
 - **Hierarchical Organization**: Files are organized in folders based on SCP identifier (e.g., SCP-1234 → `1/2/3/4/scp-1234.ext`)
 - **Flexible Input Formats**: Accept `SCP-173`, `173`, `scp-173`, or ranges like `100-200`
+- **Deterministic Random Sampling**: Use `--seed N` for reproducible random selections across all scripts
+- **Dry Run Mode**: Use `--dry-run` to preview exports without writing files
 - **Batch Processing**: Efficient handling of large exports with progress reporting
 - **Content Conversion**: Markdown export includes HTML-to-Markdown conversion for better readability
 - **Metadata Preservation**: All available metadata is preserved in appropriate formats
@@ -317,6 +331,73 @@ content_sha1: "dd28a56e4103dd5e4f7dd6915a242f004af19943"
 
 [AI-generated summary content here...]
 ```
+
+## Database Import Script
+
+Import SCP data into a LanceDB database with full schema compliance and content integration:
+
+```bash
+# Import all items into default 'items' database
+./scripts/import.py
+
+# Import single item
+./scripts/import.py SCP-173
+./scripts/import.py 682                    # Short form
+
+# Import range of items  
+./scripts/import.py 100-200               # Imports SCP-100 through SCP-200
+
+# Import random items with deterministic seeding
+./scripts/import.py --random 10           # Import 10 random items
+./scripts/import.py --random 5 --seed 42  # Deterministic random selection
+
+# Custom database name
+./scripts/import.py --db-name production --random 100
+
+# Dry run - preview without creating database
+./scripts/import.py --dry-run --random 5  # Show what would be imported
+
+# Get help
+./scripts/import.py --help
+```
+
+**Database Features:**
+- **Schema Compliance**: Uses exact schema from AGENTS.md specification
+- **Content Integration**: Automatically reads markdown and summary content from staging directories
+- **Deterministic Sampling**: Same seed produces identical item sets across all scripts
+- **YAML Frontmatter Stripping**: Automatically removes metadata headers from staged content
+- **Versioning Metadata**: Includes dataset_commit and content_sha1 for reproducibility
+
+## Database Inspection Script
+
+Dump LanceDB table contents to stdout as JSONL for analysis and processing:
+
+```bash
+# Dump all rows from 'items' table in default database
+./scripts/dump_table.py items
+
+# Dump from custom database
+./scripts/dump_table.py items --db-name production
+
+# Limit and pagination
+./scripts/dump_table.py items --limit 10         # First 10 rows
+./scripts/dump_table.py items --offset 100 --limit 5  # Skip 100, dump next 5
+
+# Integration with data processing tools
+./scripts/dump_table.py items --limit 10 | jq -r '.scp'  # Extract SCP identifiers
+./scripts/dump_table.py items | jq 'select(.rating > 100)'  # Filter by rating
+./scripts/dump_table.py items | wc -l           # Count total items
+
+# Get help
+./scripts/dump_table.py --help
+```
+
+**Output Features:**
+- **JSONL Format**: Each row as a single JSON line for easy processing
+- **Separated Streams**: Data to stdout, metadata/errors to stderr
+- **Schema Display**: Full table schema and statistics in metadata
+- **JSON Processing**: Automatic parsing of history field and timestamp conversion
+- **Tool Integration**: Perfect for piping to jq, grep, or other JSON tools
 
 ## Development
 

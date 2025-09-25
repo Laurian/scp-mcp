@@ -249,7 +249,8 @@ models/*
 
 # SCP MCP Server specific
 # LanceDB database files
-data/lancedb/*.lance
+data/lancedb/*
+!data/lancedb/.gitkeep
 
 # Processed and staging data (can be regenerated)
 data/processed/*

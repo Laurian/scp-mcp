@@ -542,12 +542,27 @@ The project includes production-ready export scripts for extracting SCP data in 
 - **Hierarchical Organization**: Files organized by SCP identifier (e.g., `1/2/3/4/scp-1234.ext`)
 - **Flexible Input**: Accepts `SCP-XXXX`, numeric, or `scp-xxxx` formats
 - **Range Processing**: Intelligent range parsing (e.g., `1-999` for Series I)
-- **Random Sampling**: Unbiased selection for testing and analysis
+- **Deterministic Random Sampling**: Use `--seed N` for reproducible random selections across all scripts
+- **Dry Run Mode**: Use `--dry-run` to preview exports without writing files or making API calls
 - **Progress Reporting**: Batch processing with status updates
 - **Content Conversion**: HTML-to-Markdown transformation for readability
 - **YAML Frontmatter**: Structured metadata in exports with full versioning information
 - **Versioning Metadata**: Includes `dataset_commit` and `content_sha1` for reproducible reads and integrity verification
 - **CC BY-SA 3.0 Compliance**: Automatic attribution inclusion
+
+**Database Import Features:**
+- **Schema Compliance**: Uses exact schema from AGENTS.md specification
+- **Content Integration**: Automatically reads markdown and summary content from staging directories
+- **YAML Frontmatter Stripping**: Removes metadata headers from staged content files
+- **LanceDB Creation**: Creates versioned databases in `data/lancedb/{db-name}/`
+- **Batch Processing**: Efficient handling of large imports with progress reporting
+
+**Database Inspection Features:**
+- **JSONL Output**: Each row as a single JSON line for easy processing
+- **Separated Streams**: Data to stdout, metadata/errors to stderr  
+- **Pagination Support**: Limit and offset for large table inspection
+- **Tool Integration**: Perfect for piping to jq, grep, or other JSON tools
+- **Schema Display**: Full table schema and statistics in metadata
 
 **AI Summary Export Additional Features:**
 - **Skip Existing Files**: Automatically resumes interrupted runs by skipping completed summaries
@@ -578,6 +593,34 @@ data/staging/
 - **AI Training**: Generate structured datasets for ML workflows
 - **Documentation**: Create human-readable SCP archives
 - **AI Summaries**: Generate concise, AI-powered summaries for quick reference and analysis
+
+#### Database Import (`scripts/import.py`)
+```bash
+# Import all items into LanceDB with schema compliance
+./scripts/import.py
+
+# Import specific items or ranges
+./scripts/import.py SCP-173          # Single item
+./scripts/import.py 100-200          # Range import
+./scripts/import.py --random 50      # Random sampling
+
+# Deterministic sampling and custom database
+./scripts/import.py --random 10 --seed 42 --db-name production
+./scripts/import.py --dry-run --random 5  # Preview import
+```
+
+#### Database Inspection (`scripts/dump_table.py`)
+```bash
+# Dump LanceDB table to JSONL for analysis
+./scripts/dump_table.py items
+
+# Custom database and pagination
+./scripts/dump_table.py items --db-name production --limit 100
+./scripts/dump_table.py items --offset 50 --limit 25
+
+# Integration with data processing tools
+./scripts/dump_table.py items | jq 'select(.rating > 100)'
+```
 
 ### Content Processing Utilities
 **Core Modules for Data Loading and Content Conversion**
