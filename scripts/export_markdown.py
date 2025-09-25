@@ -111,20 +111,24 @@ def get_items_to_export(args) -> List[str]:  # noqa: UP006
         return all_items
 
 
-def export_items(item_ids: List[str], output_base_dir: Path = None) -> None:  # noqa: UP006
+def export_items(item_ids: List[str], output_base_dir: Path = None, dry_run: bool = False) -> None:  # noqa: UP006
     """Export SCP items to individual Markdown files.
 
     Args:
         item_ids: List of SCP item IDs to export
         output_base_dir: Base directory for output (default: ./data/staging/markdown/)
+        dry_run: If True, don't write files, just show destinations
     """
     if output_base_dir is None:
         output_base_dir = Path(__file__).parent.parent / "data" / "staging" / "markdown"
 
-    # Ensure output directory exists
-    output_base_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"Exporting {len(item_ids)} items...")
+    if dry_run:
+        print(f"DRY RUN: Would export {len(item_ids)} items to {output_base_dir}")
+        print("No files will be written. Showing destination paths only...")
+    else:
+        # Ensure output directory exists
+        output_base_dir.mkdir(parents=True, exist_ok=True)
+        print(f"Exporting {len(item_ids)} items...")
 
     exported_count = 0
     skipped_count = 0
@@ -157,26 +161,37 @@ def export_items(item_ids: List[str], output_base_dir: Path = None) -> None:  # 
 
             output_file = output_dir / f"{link}.md"
 
-            # Convert content to markdown
-            markdown_content = generate_markdown_content(scp_data)
+            if dry_run:
+                print(f"Would write: {output_file}")
+            else:
+                # Convert content to markdown
+                markdown_content = generate_markdown_content(scp_data)
 
-            # Write Markdown file
-            with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(markdown_content)
+                # Write Markdown file
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    f.write(markdown_content)
 
             exported_count += 1
             if len(item_ids) > 10 and exported_count % 100 == 0:
-                print(f"Exported {exported_count} items...")
+                action = "Would export" if dry_run else "Exported"
+                print(f"{action} {exported_count} items...")
 
         except Exception as e:
             print(f"ERROR: Failed to export {item_id}: {e}")
             error_count += 1
 
-    print("\nExport completed:")
-    print(f"  Exported: {exported_count}")
-    print(f"  Skipped: {skipped_count}")
-    print(f"  Errors: {error_count}")
-    print(f"  Output directory: {output_base_dir}")
+    if dry_run:
+        print("\nDry run completed:")
+        print(f"  Would export: {exported_count}")
+        print(f"  Would skip: {skipped_count}")
+        print(f"  Errors: {error_count}")
+        print(f"  Target directory: {output_base_dir}")
+    else:
+        print("\nExport completed:")
+        print(f"  Exported: {exported_count}")
+        print(f"  Skipped: {skipped_count}")
+        print(f"  Errors: {error_count}")
+        print(f"  Output directory: {output_base_dir}")
 
 
 def generate_markdown_content(scp_data: dict) -> str:
@@ -312,6 +327,7 @@ Examples:
   %(prog)s 173               # Export single item (short form)
   %(prog)s 100-200           # Export range of items
   %(prog)s --random 10       # Export 10 random items
+  %(prog)s --dry-run --random 5  # Show what would be exported (dry run)
         """
     )
 
@@ -335,6 +351,12 @@ Examples:
         help='Output directory (default: ./data/staging/markdown/)'
     )
 
+    parser.add_argument(
+        '--dry-run', '--dry',
+        action='store_true',
+        help='Show what would be exported without writing any files'
+    )
+
     return parser
 
 
@@ -354,7 +376,7 @@ def main():
             sys.exit(1)
 
         # Export the items
-        export_items(item_ids, args.output)
+        export_items(item_ids, args.output, getattr(args, 'dry_run', False))
 
     except KeyboardInterrupt:
         print("\nExport interrupted by user")

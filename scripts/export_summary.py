@@ -213,7 +213,7 @@ def convert_to_markdown(scp_data: dict) -> Optional[str]:  # noqa: UP045
     return content
 
 
-async def export_items(item_ids: List[str], output_base_dir: Path = None, max_concurrent: int = 5, force: bool = False) -> None:  # noqa: UP006
+async def export_items(item_ids: List[str], output_base_dir: Path = None, max_concurrent: int = 5, force: bool = False, dry_run: bool = False) -> None:  # noqa: UP006
     """Export SCP items with AI-generated summaries to individual Markdown files.
 
     Args:
@@ -221,22 +221,32 @@ async def export_items(item_ids: List[str], output_base_dir: Path = None, max_co
         output_base_dir: Base directory for output (default: ./data/staging/summary/)
         max_concurrent: Maximum concurrent OpenAI API calls
         force: If True, overwrite existing files; if False, skip existing files
+        dry_run: If True, don't write files, just show destinations
     """
     if output_base_dir is None:
         output_base_dir = Path(__file__).parent.parent / "data" / "staging" / "summary"
 
-    # Ensure output directory exists
-    output_base_dir.mkdir(parents=True, exist_ok=True)
+    if dry_run:
+        print(f"DRY RUN: Would export {len(item_ids)} items with AI summaries to {output_base_dir}")
+        print("No files will be written. Showing destination paths only...")
+        print("No OpenAI API calls will be made during dry run.")
+    else:
+        # Ensure output directory exists
+        output_base_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Exporting {len(item_ids)} items with AI summaries...")
-    print(f"Max concurrent API calls: {max_concurrent}")
+        print(f"Exporting {len(item_ids)} items with AI summaries...")
+        print(f"Max concurrent API calls: {max_concurrent}")
 
-    # Set up OpenAI client
-    client = setup_openai_client()
+        # Set up OpenAI client
+        client = setup_openai_client()
 
-    # Show which model will be used
-    model = settings.openai_model or os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
-    print(f"Using model: {model}")
+        # Show which model will be used
+        model = settings.openai_model or os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+        print(f"Using model: {model}")
+
+    # Initialize client variable for dry run (won't be used)
+    if dry_run:
+        client = None
 
     exported_count = 0
     skipped_count = 0
@@ -275,6 +285,11 @@ async def export_items(item_ids: List[str], output_base_dir: Path = None, max_co
 
                 output_file = output_dir / f"{link}.md"
 
+                if dry_run:
+                    print(f"Would write: {output_file}")
+                    exported_count += 1
+                    return
+
                 # Check if file already exists and skip if it does (unless force is enabled)
                 if output_file.exists() and not force:
                     print(f"Skipping {item_id} - file already exists: {output_file}")
@@ -308,8 +323,9 @@ async def export_items(item_ids: List[str], output_base_dir: Path = None, max_co
                     # Summary generation failed, count as skipped
                     skipped_count += 1
 
-                # Add small delay to respect rate limits
-                await asyncio.sleep(0.1)
+                # Add small delay to respect rate limits (skip in dry run)
+                if not dry_run:
+                    await asyncio.sleep(0.1)
 
             except Exception as e:
                 print(f"ERROR: Failed to export {item_id}: {e}")
@@ -319,11 +335,18 @@ async def export_items(item_ids: List[str], output_base_dir: Path = None, max_co
     tasks = [process_item(item_id) for item_id in item_ids]
     await asyncio.gather(*tasks, return_exceptions=True)
 
-    print("\nExport completed:")
-    print(f"  Exported: {exported_count}")
-    print(f"  Skipped: {skipped_count}")
-    print(f"  Errors: {error_count}")
-    print(f"  Output directory: {output_base_dir}")
+    if dry_run:
+        print("\nDry run completed:")
+        print(f"  Would export: {exported_count}")
+        print(f"  Would skip: {skipped_count}")
+        print(f"  Errors: {error_count}")
+        print(f"  Target directory: {output_base_dir}")
+    else:
+        print("\nExport completed:")
+        print(f"  Exported: {exported_count}")
+        print(f"  Skipped: {skipped_count}")
+        print(f"  Errors: {error_count}")
+        print(f"  Output directory: {output_base_dir}")
 
 
 def generate_summary_markdown(scp_data: dict, summary: str) -> str:
@@ -414,6 +437,7 @@ Examples:
   %(prog)s 100-200           # Export range of item summaries
   %(prog)s --random 10       # Export 10 random item summaries
   %(prog)s --force --random 5 # Force regenerate 5 random summaries
+  %(prog)s --dry-run --random 3  # Show what would be exported (dry run)
 
 Requirements:
   - OPENAI_API_KEY must be set in .env.local
@@ -457,6 +481,12 @@ Requirements:
         help='Force regeneration of existing files (overwrite existing summaries)'
     )
 
+    parser.add_argument(
+        '--dry-run', '--dry',
+        action='store_true',
+        help='Show what would be exported without writing any files or calling OpenAI API'
+    )
+
     return parser
 
 
@@ -476,7 +506,7 @@ async def main_async():
             sys.exit(1)
 
         # Export the items with AI summaries
-        await export_items(item_ids, args.output, args.max_concurrent, args.force)
+        await export_items(item_ids, args.output, args.max_concurrent, args.force, getattr(args, 'dry_run', False))
 
     except KeyboardInterrupt:
         print("\nExport interrupted by user")
