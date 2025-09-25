@@ -24,15 +24,19 @@ import random
 import re
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List  # noqa: UP035
 
 # Add src to path so we can import our modules
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
 try:
-    from scp_mcp.utils.data_loader import get_all_item_ids, load_scp_data, get_debug_folder_path
     from scp_mcp.utils.content_converter import html_to_markdown
+    from scp_mcp.utils.data_loader import (
+        get_all_item_ids,
+        get_debug_folder_path,
+        load_scp_data,
+    )
 except ImportError as e:
     print(f"ERROR: Could not import required modules: {e}")
     print("Please make sure you have installed the required dependencies:")
@@ -53,7 +57,7 @@ def normalize_scp_id(scp_id: str) -> str:
         return scp_id.upper()
 
 
-def get_items_to_export(args) -> List[str]:
+def get_items_to_export(args) -> List[str]:  # noqa: UP006
     """Get list of item IDs to export based on command line arguments."""
     all_items = get_all_item_ids()
     if not all_items:
@@ -107,7 +111,7 @@ def get_items_to_export(args) -> List[str]:
         return all_items
 
 
-def export_items(item_ids: List[str], output_base_dir: Path = None) -> None:
+def export_items(item_ids: List[str], output_base_dir: Path = None) -> None:  # noqa: UP006
     """Export SCP items to individual Markdown files.
 
     Args:
@@ -168,7 +172,7 @@ def export_items(item_ids: List[str], output_base_dir: Path = None) -> None:
             print(f"ERROR: Failed to export {item_id}: {e}")
             error_count += 1
 
-    print(f"\nExport completed:")
+    print("\nExport completed:")
     print(f"  Exported: {exported_count}")
     print(f"  Skipped: {skipped_count}")
     print(f"  Errors: {error_count}")

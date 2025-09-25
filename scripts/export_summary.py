@@ -32,19 +32,23 @@ import os
 import random
 import re
 import sys
-import time
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional  # noqa: UP035
 
 # Add src to path so we can import our modules
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
 try:
-    from scp_mcp.utils.data_loader import get_all_item_ids, load_scp_data, get_debug_folder_path
-    from scp_mcp.utils.content_converter import html_to_markdown
-    from scp_mcp.config import settings
     import openai
+
+    from scp_mcp.config import settings
+    from scp_mcp.utils.content_converter import html_to_markdown
+    from scp_mcp.utils.data_loader import (
+        get_all_item_ids,
+        get_debug_folder_path,
+        load_scp_data,
+    )
 except ImportError as e:
     print(f"ERROR: Could not import required modules: {e}")
     print("Please make sure you have installed the required dependencies:")
@@ -65,7 +69,7 @@ def normalize_scp_id(scp_id: str) -> str:
         return scp_id.upper()
 
 
-def get_items_to_export(args) -> List[str]:
+def get_items_to_export(args) -> List[str]:  # noqa: UP006
     """Get list of item IDs to export based on command line arguments."""
     all_items = get_all_item_ids()
     if not all_items:
@@ -186,7 +190,7 @@ Content:
         return None  # Return None instead of error message
 
 
-def convert_to_markdown(scp_data: dict) -> Optional[str]:
+def convert_to_markdown(scp_data: dict) -> Optional[str]:  # noqa: UP045
     """Convert SCP data to markdown format (without metadata)."""
     # Try to get markdown content first, then fall back to raw content
     content = None
@@ -209,7 +213,7 @@ def convert_to_markdown(scp_data: dict) -> Optional[str]:
     return content
 
 
-async def export_items(item_ids: List[str], output_base_dir: Path = None, max_concurrent: int = 5, force: bool = False) -> None:
+async def export_items(item_ids: List[str], output_base_dir: Path = None, max_concurrent: int = 5, force: bool = False) -> None:  # noqa: UP006
     """Export SCP items with AI-generated summaries to individual Markdown files.
 
     Args:
@@ -315,7 +319,7 @@ async def export_items(item_ids: List[str], output_base_dir: Path = None, max_co
     tasks = [process_item(item_id) for item_id in item_ids]
     await asyncio.gather(*tasks, return_exceptions=True)
 
-    print(f"\nExport completed:")
+    print("\nExport completed:")
     print(f"  Exported: {exported_count}")
     print(f"  Skipped: {skipped_count}")
     print(f"  Errors: {error_count}")
@@ -485,7 +489,7 @@ def main():
     """Main entry point."""
     # Check if we're in an async context already
     try:
-        loop = asyncio.get_running_loop()
+        asyncio.get_running_loop()
         # If we get here, we're already in an async context
         # This shouldn't happen in a script, but just in case
         print("ERROR: Cannot run in existing async context")

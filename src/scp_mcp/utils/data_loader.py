@@ -19,13 +19,12 @@ Usage example:
 
 import hashlib
 import json
-from pathlib import Path
 from typing import Optional
 
 from ..config import settings
 
 
-def load_scp_data(scp_identifier: str) -> Optional[dict]:
+def load_scp_data(scp_identifier: str) -> Optional[dict]:  # noqa: UP045
     """Load SCP data from the latest dataset.
 
     Args:
@@ -71,7 +70,7 @@ def load_scp_data(scp_identifier: str) -> Optional[dict]:
 
     try:
         # Load index to find content file
-        with open(index_file, 'r', encoding='utf-8') as f:
+        with open(index_file, 'r', encoding='utf-8') as f:  # noqa: UP015
             index_data = json.load(f)
 
         # Find the SCP in index
@@ -89,7 +88,7 @@ def load_scp_data(scp_identifier: str) -> Optional[dict]:
         if not content_file_path.exists():
             return None
 
-        with open(content_file_path, 'r', encoding='utf-8') as f:
+        with open(content_file_path, 'r', encoding='utf-8') as f:  # noqa: UP015
             content_data = json.load(f)
 
         # Get the specific item data
@@ -110,11 +109,11 @@ def load_scp_data(scp_identifier: str) -> Optional[dict]:
 
         return item_data
 
-    except (json.JSONDecodeError, KeyError, IOError):
+    except (json.JSONDecodeError, KeyError, IOError):  # noqa: UP024
         return None
 
 
-def get_all_item_ids() -> Optional[list[str]]:
+def get_all_item_ids() -> Optional[list[str]]:  # noqa: UP045
     """Get all SCP item IDs from the index.json file.
 
     Returns:
@@ -131,12 +130,12 @@ def get_all_item_ids() -> Optional[list[str]]:
 
     try:
         # Load index and return keys
-        with open(index_file, 'r', encoding='utf-8') as f:
+        with open(index_file, 'r', encoding='utf-8') as f:  # noqa: UP015
             index_data = json.load(f)
 
         return list(index_data.keys())
 
-    except (json.JSONDecodeError, IOError):
+    except (json.JSONDecodeError, IOError):  # noqa: UP024
         return None
 
 
@@ -167,7 +166,7 @@ def get_debug_folder_path(scp_item: dict) -> str:
         return 'unknown'
 
 
-def get_scp_html_content(scp_identifier: str) -> Optional[str]:
+def get_scp_html_content(scp_identifier: str) -> Optional[str]:  # noqa: UP045
     """Get HTML content for an SCP from the dataset.
 
     Args:
