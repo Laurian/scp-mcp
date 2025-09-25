@@ -69,6 +69,12 @@ def get_items_to_export(args) -> List[str]:  # noqa: UP006
         if args.random > len(all_items):
             print(f"WARNING: Requested {args.random} random items but only {len(all_items)} available")
             return all_items
+
+        # Set random seed for deterministic sampling if provided
+        if args.seed is not None:
+            random.seed(args.seed)
+            print(f"Using random seed: {args.seed}")
+
         return random.sample(all_items, args.random)
 
     elif args.item_or_range:
@@ -203,7 +209,8 @@ Examples:
   %(prog)s 173               # Export single item (short form)
   %(prog)s 100-200           # Export range of items
   %(prog)s --random 10       # Export 10 random items
-  %(prog)s --dry-run --random 5  # Show what would be exported (dry run)
+  %(prog)s --random 5 --seed 42    # Export 5 random items (deterministic)
+  %(prog)s --dry-run --random 5 --seed 123  # Show what would be exported (dry run)
         """
     )
 
@@ -231,6 +238,13 @@ Examples:
         '--dry-run', '--dry',
         action='store_true',
         help='Show what would be exported without writing any files'
+    )
+
+    parser.add_argument(
+        '--seed', '-s',
+        type=int,
+        metavar='N',
+        help='Random seed for deterministic sampling (use with --random)'
     )
 
     return parser

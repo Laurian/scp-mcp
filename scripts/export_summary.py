@@ -81,6 +81,12 @@ def get_items_to_export(args) -> List[str]:  # noqa: UP006
         if args.random > len(all_items):
             print(f"WARNING: Requested {args.random} random items but only {len(all_items)} available")
             return all_items
+
+        # Set random seed for deterministic sampling if provided
+        if args.seed is not None:
+            random.seed(args.seed)
+            print(f"Using random seed: {args.seed}")
+
         return random.sample(all_items, args.random)
 
     elif args.item_or_range:
@@ -436,8 +442,9 @@ Examples:
   %(prog)s 173               # Export single item (short form)
   %(prog)s 100-200           # Export range of item summaries
   %(prog)s --random 10       # Export 10 random item summaries
-  %(prog)s --force --random 5 # Force regenerate 5 random summaries
-  %(prog)s --dry-run --random 3  # Show what would be exported (dry run)
+  %(prog)s --random 5 --seed 42    # Export 5 random items (deterministic)
+  %(prog)s --force --random 5 --seed 42 # Force regenerate 5 deterministic summaries
+  %(prog)s --dry-run --random 3 --seed 123  # Show what would be exported (dry run)
 
 Requirements:
   - OPENAI_API_KEY must be set in .env.local
@@ -485,6 +492,13 @@ Requirements:
         '--dry-run', '--dry',
         action='store_true',
         help='Show what would be exported without writing any files or calling OpenAI API'
+    )
+
+    parser.add_argument(
+        '--seed', '-s',
+        type=int,
+        metavar='N',
+        help='Random seed for deterministic sampling (use with --random)'
     )
 
     return parser
