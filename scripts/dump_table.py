@@ -108,6 +108,11 @@ def dump_table(
         # Print metadata to stderr
         print(f"# Database: {db_name}", file=sys.stderr)
         print(f"# Table: {table_name}", file=sys.stderr)
+        versions = table.list_versions()
+        print(f"# Number of versions after creation: {len(versions)}", file=sys.stderr)
+        for v in versions:
+            print(f"# Version {v['version']}, created at {v['timestamp']}", file=sys.stderr)
+        print(f"# Current version: {table.version}", file=sys.stderr)
         print(f"# Total rows in table: {total_rows}", file=sys.stderr)
         print(f"# Offset: {offset}", file=sys.stderr)
         print(f"# Limit: {limit if limit is not None else 'none'}", file=sys.stderr)

@@ -328,13 +328,9 @@ def scp_item_to_dict(item: SCPItem) -> dict:
         data['history'] = json.dumps([])
 
     # Ensure all fields are present (LanceDB requires consistent schema)
-    schema_fields = [
-        'link', 'scp', 'scp_number', 'title', 'series', 'tags', 'rating',
-        'created_at', 'creator', 'url', 'domain', 'page_id',
-        'raw_source', 'raw_content', 'markdown', 'summary',
-        'images', 'hubs', 'references', 'history',
-        'content_file', 'content_sha1', 'dataset_commit'
-    ]
+    # Extract field names from the schema to ensure consistency
+    schema = get_lancedb_schema()
+    schema_fields = [field.name for field in schema]
 
     for field in schema_fields:
         if field not in data:
@@ -431,8 +427,9 @@ async def import_items(
             # Create or replace table with the items
             print(f"Creating LanceDB table with {len(items_to_insert)} items...")
 
-            # Create table (will overwrite if exists)
-            table = db.create_table("items", items_to_insert, mode="overwrite")
+            # Create table with explicit schema (will overwrite if exists)
+            schema = get_lancedb_schema()
+            table = db.create_table("items", items_to_insert, schema=schema, mode="overwrite")
 
             print(f"Successfully created table with {len(items_to_insert)} items")
             print(f"Table schema: {table.schema}")
